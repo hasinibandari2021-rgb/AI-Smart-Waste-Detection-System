@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Waste Detection Result</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- Header -->
+
+    <div class="header">
+
+        <div class="logo">
+            ♻️
+        </div>
+
+        <h1>Waste Detection Result</h1>
+
+        <p class="subtitle">
+            AI analysis of your uploaded waste image
+        </p>
+
+    </div>
+
+
+    <!-- Result Card -->
+
+    <div class="result-card">
+
+
+        <!-- Image -->
+
+        <div class="image-section">
+
+            <div class="image-wrapper">
+
+                <img
+                    src="{{ image_path }}"
+                    alt="Uploaded Waste Image"
+                >
+
+            </div>
+
+            <p class="image-label">
+                📷 Uploaded Waste Image
+            </p>
+
+        </div>
+
+
+        <!-- Result Information -->
+
+        <div class="result-section">
+
+            <span class="result-badge">
+                🤖 AI Detection
+            </span>
+
+            <h2>
+                {{ result.waste_type }}
+            </h2>
+
+
+            <!-- Category -->
+
+            <div class="result-item">
+
+                <span class="result-icon">
+                    ♻️
+                </span>
+
+                <div>
+
+                    <small>
+                        Category
+                    </small>
+
+                    <strong>
+                        {{ result.category }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <!-- Confidence -->
+
+            <div class="confidence">
+
+                <div class="confidence-header">
+
+                    <span>
+                        🎯 Confidence
+                    </span>
+
+                    <strong>
+                        {{ result.confidence }}%
+                    </strong>
+
+                </div>
+
+                <div class="progress">
+
+                    <div
+                        class="progress-bar"
+                        style="width: {{ result.confidence }}%;">
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Description -->
+
+            <div class="ai-analysis">
+
+                <h3>
+                    🤖 AI Analysis
+                </h3>
+
+                <p>
+                    {{ result.description }}
+                </p>
+
+            </div>
+
+
+            <!-- Disposal -->
+
+            <div class="disposal">
+
+                <strong>
+                    ♻️ Recommended Disposal
+                </strong>
+
+                <p>
+                    {{ result.disposal_method }}
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Environmental Tip -->
+
+    <div class="environment-tip">
+
+        <h3>
+            🌱 Environmental Tip
+        </h3>
+
+        <p>
+            Proper waste segregation helps improve recycling,
+            reduce landfill waste, and protect the environment.
+            Always separate recyclable, organic, and non-recyclable
+            materials whenever possible.
+        </p>
+
+    </div>
+
+
+    <!-- Buttons -->
+
+    <div class="result-buttons">
+
+        <a
+            href="{{ url_for('home') }}"
+            class="back-button"
+        >
+            🔄 Analyze Another Image
+        </a>
+
+        <a
+            href="{{ url_for('home') }}"
+            class="home-button"
+        >
+            🏠 Back to Home
+        </a>
+
+    </div>
+
+
+    <!-- Footer -->
+
+    <footer>
+
+        <p>
+            🌍 AI-Based Smart Waste Management System
+        </p>
+
+    </footer>
+
+</div>
+
+</body>
+</html>

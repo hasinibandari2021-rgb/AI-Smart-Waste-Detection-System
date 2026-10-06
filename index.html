@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>AI Smart Waste Detection</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- Header -->
+
+    <div class="header">
+
+        <div class="logo">
+            ♻️
+        </div>
+
+        <h1>AI Smart Waste Detection</h1>
+
+        <p class="subtitle">
+            Upload an image to identify the type of waste
+            using AI-based image analysis.
+        </p>
+
+    </div>
+
+
+    <!-- Error -->
+
+    {% if error %}
+
+    <div class="error">
+        ⚠️ {{ error }}
+    </div>
+
+    {% endif %}
+
+
+    <!-- Upload Card -->
+
+    <div class="upload-box">
+
+        <div class="upload-icon">
+            📷
+        </div>
+
+        <h2>Upload Waste Image</h2>
+
+        <p class="upload-text">
+            Select an image of the waste item
+            you want to analyze.
+        </p>
+
+        <form action="{{ url_for('detect') }}"
+              method="POST"
+              enctype="multipart/form-data">
+
+            <input
+                type="file"
+                name="image"
+                accept=".jpg,.jpeg,.png,.webp"
+                required
+            >
+
+            <button type="submit">
+                🔍 Detect Waste
+            </button>
+
+        </form>
+
+        <p class="supported">
+            Supported formats: JPG, JPEG, PNG, WEBP
+        </p>
+
+    </div>
+
+
+    <!-- Supported Waste Types -->
+
+    <div class="info">
+
+        <h3>♻️ Supported Waste Types</h3>
+
+        <div class="types">
+
+            <span>📄 Paper</span>
+
+            <span>🥬 Organic</span>
+
+            <span>🥤 Plastic</span>
+
+            <span>🔩 Metal</span>
+
+            <span>🗑️ Mixed Waste</span>
+
+        </div>
+
+    </div>
+
+
+    <!-- How It Works -->
+
+    <div class="how-it-works">
+
+        <h3>How It Works</h3>
+
+        <div class="steps">
+
+            <div class="step">
+
+                <div class="step-icon">
+                    📤
+                </div>
+
+                <h4>1. Upload</h4>
+
+                <p>
+                    Upload an image of waste.
+                </p>
+
+            </div>
+
+
+            <div class="step">
+
+                <div class="step-icon">
+                    🤖
+                </div>
+
+                <h4>2. Analyze</h4>
+
+                <p>
+                    The system analyzes the image.
+                </p>
+
+            </div>
+
+
+            <div class="step">
+
+                <div class="step-icon">
+                    ♻️
+                </div>
+
+                <h4>3. Dispose</h4>
+
+                <p>
+                    Get suitable disposal guidance.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Footer -->
+
+    <footer>
+
+        <p>
+            🌱 AI-Based Smart Waste Management System
+        </p>
+
+    </footer>
+
+</div>
+
+</body>
+</html>

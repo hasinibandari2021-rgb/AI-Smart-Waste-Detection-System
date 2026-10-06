@@ -1,0 +1,20 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Uploaded images
+assets/uploads/*
+!assets/uploads/.gitkeep
+
+# VS Code
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Flask
+instance/
+
+# Logs
+*.log
