@@ -7,6 +7,9 @@ The AI Smart Waste Detection System is a web-based application developed using P
 The application provides information about the detected waste, its category, confidence level, description, and suggested disposal method.
 
 This project is designed as an educational and demonstration project for smart waste management.
+live  Demo
+https://ai-smart-waste-detection-system-3tosmvhejyr9bmufsalbmr.streamlit.app/
+
 
 ## 2. Objectives
 
