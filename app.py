@@ -1,73 +1,99 @@
-import os
-import time
-
-from flask import Flask, render_template, request, send_from_directory
-from werkzeug.utils import secure_filename
+import streamlit as st
 from PIL import Image
 import numpy as np
 
 
-app = Flask(__name__)
-
 # =========================
-# UPLOAD SETTINGS
+# PAGE CONFIGURATION
 # =========================
 
-UPLOAD_FOLDER = os.path.join("assets", "uploads")
+st.set_page_config(
+    page_title="AI Smart Waste Detection System",
+    page_icon="♻️",
+    layout="centered"
+)
 
-ALLOWED_EXTENSIONS = {
-    "png",
-    "jpg",
-    "jpeg",
-    "webp"
+
+# =========================
+# CUSTOM CSS
+# =========================
+
+st.markdown("""
+<style>
+
+.main {
+    padding-top: 20px;
 }
 
-app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024
+.title {
+    text-align: center;
+    font-size: 40px;
+    font-weight: bold;
+}
 
-# Create upload folder if it does not exist
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+.subtitle {
+    text-align: center;
+    font-size: 18px;
+    margin-bottom: 30px;
+}
+
+.result-box {
+    padding: 20px;
+    border-radius: 15px;
+    border: 1px solid #ddd;
+    margin-top: 20px;
+}
+
+</style>
+""", unsafe_allow_html=True)
 
 
 # =========================
-# CHECK ALLOWED FILE
+# TITLE
 # =========================
 
-def allowed_file(filename):
-    return (
-        "." in filename
-        and filename.rsplit(".", 1)[1].lower()
-        in ALLOWED_EXTENSIONS
-    )
+st.markdown(
+    '<div class="title">♻️ AI Smart Waste Detection System</div>',
+    unsafe_allow_html=True
+)
+
+st.markdown(
+    '<div class="subtitle">Upload an image and detect the type of waste</div>',
+    unsafe_allow_html=True
+)
 
 
 # =========================
-# WASTE ANALYSIS
+# WASTE ANALYSIS FUNCTION
 # =========================
 
-def analyze_waste(image_path):
+def analyze_waste(image):
 
-    image = Image.open(image_path).convert("RGB")
+    # Convert image to RGB
+    image = image.convert("RGB")
 
     # Resize image
     image = image.resize((200, 200))
 
-    # Convert to NumPy array
+    # Convert image to NumPy array
     img = np.array(image)
 
-    # Average RGB values
+    # Calculate average RGB values
     avg_color = img.mean(axis=(0, 1))
 
     red = float(avg_color[0])
     green = float(avg_color[1])
     blue = float(avg_color[2])
 
+    # Calculate brightness
     brightness = (red + green + blue) / 3
-    # Color variation
+
+    # Calculate color variation
     color_variation = float(img.std())
 
+
     # =========================
-    # SIMPLE CLASSIFICATION
+    # CLASSIFICATION
     # =========================
 
     if brightness > 210 and color_variation < 35:
@@ -75,70 +101,88 @@ def analyze_waste(image_path):
         waste_type = "Paper"
         category = "Recyclable"
         confidence = 87
+
         disposal = (
             "Place it in the paper recycling bin. "
-            "Keep paper dry and remove plastic or non-paper materials."
+            "Keep paper dry and remove plastic or "
+            "non-paper materials."
         )
+
         description = (
-            "The image appears to contain a light-colored "
-            "paper-like material."
+            "The image appears to contain a "
+            "light-colored paper-like material."
         )
+
 
     elif green > red * 1.15 and green > blue * 1.10:
 
         waste_type = "Organic"
         category = "Compostable"
         confidence = 84
+
         disposal = (
-            "Place it in the organic waste or compost bin. "
-            "Avoid mixing it with plastic or metal waste."
+            "Place it in the organic waste or "
+            "compost bin. Avoid mixing it with "
+            "plastic or metal waste."
         )
+
         description = (
-            "The image has strong green or organic visual "
-            "characteristics."
+            "The image has strong green or "
+            "organic visual characteristics."
         )
+
 
     elif red > blue * 1.20 and red > green * 1.10:
 
         waste_type = "Plastic"
         category = "Recyclable"
         confidence = 72
+
         disposal = (
-            "Place it in the recyclable plastic waste bin. "
-            "Clean the container before recycling when possible."
+            "Place it in the recyclable plastic "
+            "waste bin. Clean the container before "
+            "recycling when possible."
         )
+
         description = (
             "The image contains visual characteristics "
             "that may indicate plastic waste."
         )
+
 
     elif color_variation > 70:
 
         waste_type = "Mixed Waste"
         category = "Non-Recyclable / Mixed"
         confidence = 76
+
         disposal = (
             "Separate recyclable and organic materials "
             "before disposing of the remaining waste."
         )
+
         description = (
-            "The image contains multiple different visual "
-            "regions and may represent mixed waste."
+            "The image contains multiple different "
+            "visual regions and may represent mixed waste."
         )
+
 
     else:
 
         waste_type = "Other"
         category = "Check Manually"
         confidence = 55
+
         disposal = (
-            "Check the item manually and place it in "
-            "the appropriate waste bin."
+            "Check the item manually and place it "
+            "in the appropriate waste bin."
         )
+
         description = (
             "The system could not confidently identify "
             "a specific waste category."
         )
+
 
     return {
         "waste_type": waste_type,
@@ -150,108 +194,142 @@ def analyze_waste(image_path):
 
 
 # =========================
-# HOME PAGE
+# IMAGE UPLOAD
 # =========================
 
-@app.route("/")
-def home():
-    return render_template("index.html")
+st.subheader("📤 Upload Waste Image")
+
+uploaded_file = st.file_uploader(
+    "Choose an image",
+    type=["jpg", "jpeg", "png", "webp"]
+)
 
 
 # =========================
-# DETECT WASTE
+# IMAGE PROCESSING
 # =========================
 
-@app.route("/detect", methods=["POST"])
-def detect():
-
-    # Check if image exists
-    if "image" not in request.files:
-
-        return render_template(
-            "index.html",
-            error="Please select an image."
-        )
-
-    file = request.files["image"]
-
-    # Check empty filename
-    if file.filename == "":
-
-        return render_template(
-            "index.html",
-            error="Please select an image."
-        )
-
-    # Check file extension
-    if not allowed_file(file.filename):
-
-        return render_template(
-            "index.html",
-            error="Only JPG, JPEG, PNG and WEBP images are allowed."
-        )
+if uploaded_file is not None:
 
     try:
 
-        # Secure original filename
-        original_name = secure_filename(file.filename)
+        # Open uploaded image
+        image = Image.open(uploaded_file)
 
-        # Create unique filename
-        filename = (
-            str(int(time.time() * 1000))
-            + "_"
-            + original_name
+        # Display image
+        st.image(
+            image,
+            caption="Uploaded Waste Image",
+            use_container_width=True
         )
 
-        # Full file path
-        filepath = os.path.join(
-            app.config["UPLOAD_FOLDER"],
-            filename
-        )
+        st.write("")
 
-        # Save uploaded image
-        file.save(filepath)
 
-        # Analyze image
-        result = analyze_waste(filepath)
+        # =========================
+        # DETECT BUTTON
+        # =========================
 
-        # URL used by browser to display image
-        image_path = "/uploads/" + filename
+        if st.button(
+            "🔍 Detect Waste",
+            use_container_width=True
+        ):
 
-        return render_template(
-            "result.html",
-            result=result,
-            image_path=image_path
-        )
+            with st.spinner("Analyzing image..."):
+
+                result = analyze_waste(image)
+
+
+            # =========================
+            # RESULT
+            # =========================
+
+            st.success("Waste Detection Completed!")
+
+
+            st.markdown(
+                '<div class="result-box">',
+                unsafe_allow_html=True
+            )
+
+
+            st.subheader("📊 Detection Result")
+
+
+            st.write(
+                "### 🗑️ Waste Type"
+            )
+
+            st.write(
+                result["waste_type"]
+            )
+
+
+            st.write(
+                "### ♻️ Category"
+            )
+
+            st.write(
+                result["category"]
+            )
+
+
+            st.write(
+                "### 🎯 Confidence"
+            )
+
+            st.progress(
+                result["confidence"] / 100
+            )
+
+            st.write(
+                f'{result["confidence"]}%'
+            )
+
+
+            st.write(
+                "### 📝 Description"
+            )
+
+            st.write(
+                result["description"]
+            )
+
+
+            st.write(
+                "### 🚮 Disposal Method"
+            )
+
+            st.info(
+                result["disposal_method"]
+            )
+
+
+            st.markdown(
+                '</div>',
+                unsafe_allow_html=True
+            )
+
 
     except Exception as e:
 
-        return render_template(
-            "index.html",
-            error="Error analyzing image: " + str(e)
+        st.error(
+            f"Error processing image: {str(e)}"
         )
 
 
 # =========================
-# SERVE UPLOADED IMAGES
+# FOOTER
 # =========================
 
-@app.route("/uploads/<filename>")
-def uploaded_file(filename):
+st.markdown("---")
 
-    return send_from_directory(
-        app.config["UPLOAD_FOLDER"],
-        filename
-    )
-
-
-# =========================
-# RUN APPLICATION
-# =========================
-
-if __name__ == "__main__":
-    app.run(
-        debug=True,
-        host="0.0.0.0",
-        port=5000
-    )
+st.markdown(
+    """
+    <div style="text-align:center;">
+        <p>♻️ AI Smart Waste Detection System</p>
+        <p>Helping users identify and properly dispose of waste.</p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
